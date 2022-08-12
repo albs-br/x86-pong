@@ -28,7 +28,7 @@ start:
     ;mov 	ds, ax       ; Setup data segment
 
 
-	jmp m4 ; show palette
+	;jmp m4 ; show palette
 
 ; ---------------------- test code here
     
@@ -106,8 +106,10 @@ exit:
 
 section .data
 
-image_1:	
-	db	10, 10, 10, 10, 10, 10, 10, 10
-    db	39, 39, 39, 39, 39, 39, 39, 39
-    db	20, 20, 20, 20, 20, 20, 20, 20
-.size: equ $ - image_1
+; image_1:	
+; 	db	10, 10, 10, 10, 10, 10, 10, 10
+;     db	39, 39, 39, 39, 39, 39, 39, 39
+;     db	20, 20, 20, 20, 20, 20, 20, 20
+; .size: equ $ - image_1
+
+%include "data.asm"
