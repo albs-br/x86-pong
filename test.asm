@@ -24,41 +24,61 @@ start:
     mov 	es, ax       ; Setup extended segment
     ;mov 	ds, ax       ; Setup data segment
 
-    ;mov 	ax, 0x0000   
-    ;mov 	ds, ax       ; Setup data segment
-
+    cld                  ; Clear Direction flag
 
 	;jmp m4 ; show palette
 
 ; ---------------------- test code here
     
-    mov	bx, image_1
-    mov	al, [bx]
+    call    test_subroutine
+    jmp     exit
+
+test_subroutine:
+    mov	    bx, image_1
+    mov	    al, [bx]
     
     ;mov 	al, 10
     
     ;mov 	al, [image_1 + 1]
             
-    mov 	di, 10
+    mov 	di, (320 * 100) + 160       ; initial vram address
     
-    mov	cx, image_1.size ; 24		; counter
+    mov	    ch, 8 ; image_1.size		; line counter
+loop_2:
+    mov	    cl, 8 ; image_1.size		; column counter
 loop_1:        
-    mov	al, [bx]
-    stosb           	; Write AL into address pointed by ES:DI, increment DI
-        
-	inc	bx
-        
-    dec	word cx
-
-	jnz	loop_1		; jump if non zero
-    ;jns	loop_1         	; Is it negative? No, jump
+    push    di
+        mov	    al, [bx]
+        stosb           	; Write AL into address pointed by ES:DI, increment DI
+            
+        inc	    bx
+            
+        dec	    byte cl
+        jnz	    loop_1		; jump if non zero
+        ;jns	loop_1         	; Is it negative? No, jump
+    pop     di
     
 
-    mov 	di, 320 ; second line
-    mov	al, 39
-    stosb           	; Write AL into address pointed by DI
+    ; next line
+    ; mov     ax, bx
+    ; add     ax, 320
+    ; mov     bx, ax
+    add     di, 320
 
-	jmp exit
+
+    dec	    byte ch
+	jnz	    loop_2		; jump if non zero
+
+
+
+
+    ; mov 	di, 320 ; second line
+    ; mov	    al, 39
+    ; stosb           	; Write AL into address pointed by DI
+
+
+	ret
+    ; jmp exit
         
 ; ---------------------- 
         
