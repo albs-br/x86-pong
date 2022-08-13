@@ -30,40 +30,50 @@ start:
 
 ; ---------------------- test code here
     
-    call    test_subroutine
+    mov	    bx, image_1
+    mov 	di, (320 * 100) + 160       ; initial vram address
+    call    Put_8x8_TileOnScreen
+
+    mov	    bx, image_1
+    mov 	di, (320 * 108) + 168       ; initial vram address
+    call    Put_8x8_TileOnScreen
+
     jmp     exit
 
-test_subroutine:
-    mov	    bx, image_1
-    mov	    al, [bx]
+; Inputs:
+;   BX: source address
+;   ES:DI: destiny address (VRAM)
+Put_8x8_TileOnScreen:
+    ;mov	    al, [bx]
     
     ;mov 	al, 10
     
     ;mov 	al, [image_1 + 1]
             
-    mov 	di, (320 * 100) + 160       ; initial vram address
     
     mov	    ch, 8 ; image_1.size		; line counter
 loop_2:
     mov	    cl, 8 ; image_1.size		; column counter
 loop_1:        
-    push    di
+    ;push    di
+    ;mov     dx, di
         mov	    al, [bx]
-        stosb           	; Write AL into address pointed by ES:DI, increment DI
+        stosb           	; Write AL into address pointed by ES:DI, increments DI
             
         inc	    bx
             
         dec	    byte cl
         jnz	    loop_1		; jump if non zero
         ;jns	loop_1         	; Is it negative? No, jump
-    pop     di
+    ; pop     di
+    ;mov     di, dx
     
 
     ; next line
     ; mov     ax, bx
     ; add     ax, 320
     ; mov     bx, ax
-    add     di, 320
+    add     di, 320 - 8     ; 320: width of screen, 8: width of tile
 
 
     dec	    byte ch
