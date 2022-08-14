@@ -30,26 +30,36 @@ start:
 
 ; ---------------------- test code here
     
-    mov      cx, (320/8); + (200/8)
+    ; first line
+    mov	    bx, Tile_Bricks
+    mov     cx, 40              ; number of tiles
+    mov 	di, (320 * (0 * 8)) ; initial vram address
+    call    FillLineWith_8x8_Tiles
 
-    mov 	di, (320 * 0)       ; initial vram address
-
-.loop_fillScreen:
-    push    di
-        push    cx
-            mov	    bx, Image_2
-            call    Put_8x8_TileOnScreen
-        pop     cx
-    pop     di
-
-    add     di, 8
-    ; sub     di, (320 * 8) + 8     ; 320: width of screen, 8: width of tile
+    mov     cx, 23              ; number of lines
 
 
-    ;add     cx, 8
+    mov 	di, (320 * (1 * 8)) ; initial vram address
+.loop_bg:
+    push    cx
+        push    di
+            mov	    bx, Tile_BgPattern
+            mov     cx, 40              ; number of tiles
+            call    FillLineWith_8x8_Tiles
+        pop     di
+    pop     cx
+
+    add     di, 320 * 8
+
     dec     cx
-    jnz     .loop_fillScreen
-    
+    jnz     .loop_bg
+
+
+    ; last line
+    mov	    bx, Tile_Bricks
+    mov     cx, 40              ; number of tiles
+    mov 	di, (320 * (24 * 8)) ; initial vram address
+    call    FillLineWith_8x8_Tiles
 
 
     mov	    bx, Image_1
@@ -92,6 +102,29 @@ loop_1:
 
 
 	ret
+
+
+
+; Inputs:
+;   BX: address of tile pattern
+;   CX: number of 8x8 tiles
+;   ES:DI: destiny address (VRAM)
+FillLineWith_8x8_Tiles:
+.loop:
+    push    bx
+        push    di
+            push    cx
+                call    Put_8x8_TileOnScreen
+            pop     cx
+        pop     di
+    pop     bx
+
+    add     di, 8
+
+    dec     cx
+    jnz     .loop
+
+    ret
         
 ; ---------------------- 
         
