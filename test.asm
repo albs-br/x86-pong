@@ -26,16 +26,34 @@ start:
 
     cld                  ; Clear Direction flag
 
-	;jmp m4 ; show palette
+	;jmp     show_palette
 
 ; ---------------------- test code here
     
-    mov	    bx, image_1
-    mov 	di, (320 * 100) + 160       ; initial vram address
-    call    Put_8x8_TileOnScreen
+    mov      cx, (320/8); + (200/8)
 
-    mov	    bx, image_1
-    mov 	di, (320 * 108) + 168       ; initial vram address
+    mov 	di, (320 * 100)       ; initial vram address
+
+.loop_fillScreen:
+    push    di
+        push    cx
+            mov	    bx, Image_2
+            call    Put_8x8_TileOnScreen
+        pop     cx
+    pop     di
+
+    add     di, 8
+    ; sub     di, (320 * 8) + 8     ; 320: width of screen, 8: width of tile
+
+
+    ;add     cx, 8
+    dec     cx
+    jnz     .loop_fillScreen
+    
+
+
+    mov	    bx, Image_1
+    mov 	di, (320 * 130) + 180       ; initial vram address
     call    Put_8x8_TileOnScreen
 
     jmp     exit
@@ -65,7 +83,7 @@ loop_1:
         dec	    byte cl
         jnz	    loop_1		; jump if non zero
         ;jns	loop_1         	; Is it negative? No, jump
-    ; pop     di
+    ;pop     di
     ;mov     di, dx
     
 
@@ -74,6 +92,7 @@ loop_1:
     ; add     ax, 320
     ; mov     bx, ax
     add     di, 320 - 8     ; 320: width of screen, 8: width of tile
+    ;add     di, 8
 
 
     dec	    byte ch
@@ -92,7 +111,7 @@ loop_1:
         
 ; ---------------------- 
         
-m4:
+show_palette:
     mov ax,127      ; 127 as row
     mov [v_a],ax    ; Save into v_a
 m0:     mov ax,127      ; 127 as column
