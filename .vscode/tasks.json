@@ -9,11 +9,11 @@
             "command": "assemble.bat",
                 "args": [
                     {
-                        "value": "test",    // input (entrypoint assembly source file - .asm extension)
+                        "value": "main",    // input (entrypoint assembly source file - .asm extension)
                         "quoting": "weak"
                     },
                     {
-                        "value": "test",    // output (.com file ready to use)
+                        "value": "x86-pong",    // output (.com file ready to use)
                         "quoting": "weak"
                     }
                 ],
@@ -30,7 +30,7 @@
             "command": "C:\\Program Files (x86)\\DOSBox-0.74-3\\DOSBox.exe",
                 "args": [
                     {
-                        "value": "${workspaceFolder}\\test.com",
+                        "value": "${workspaceFolder}\\x86-pong.com",
                         //"value": "${fileBasenameNoExtension}.com",
                         "quoting": "weak"
                     },
