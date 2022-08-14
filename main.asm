@@ -61,15 +61,25 @@ start:
     mov 	di, (320 * (24 * 8)) ; initial vram address
     call    FillLineWith_8x8_Tiles
 
+; ---------------------- test put tile
 
     mov	    bx, Image_1
     mov 	di, (320 * 130) + 180       ; initial vram address
     call    Put_8x8_TileOnScreen
 
-    jmp     exit
+; ---------------------- sprites test
+
+    mov	    bx, Sprite_Ball
+    ;mov	    bx, Image_1
+    mov 	di, (320 * 30) + 30       ; initial vram address
+    call    Put_8x8_SpriteOnScreen
+    ;call    Put_8x8_TileOnScreen
 
 ; ---------------------- 
-        
+
+    jmp     exit
+
+
 show_palette:
     mov ax,127      ; 127 as row
     mov [v_a],ax    ; Save into v_a
@@ -121,3 +131,4 @@ exit:
 section .data
 
 %include "tiles.asm"
+%include "sprites.asm"
