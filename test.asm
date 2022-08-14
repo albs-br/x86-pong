@@ -32,7 +32,7 @@ start:
     
     mov      cx, (320/8); + (200/8)
 
-    mov 	di, (320 * 100)       ; initial vram address
+    mov 	di, (320 * 0)       ; initial vram address
 
 .loop_fillScreen:
     push    di
@@ -72,9 +72,8 @@ Put_8x8_TileOnScreen:
     mov	    ch, 8 ; image_1.size		; line counter
 loop_2:
     mov	    cl, 8 ; image_1.size		; column counter
+    push    di
 loop_1:        
-    ;push    di
-    ;mov     dx, di
         mov	    al, [bx]
         stosb           	; Write AL into address pointed by ES:DI, increments DI
             
@@ -83,31 +82,16 @@ loop_1:
         dec	    byte cl
         jnz	    loop_1		; jump if non zero
         ;jns	loop_1         	; Is it negative? No, jump
-    ;pop     di
-    ;mov     di, dx
+    pop     di
     
-
-    ; next line
-    ; mov     ax, bx
-    ; add     ax, 320
-    ; mov     bx, ax
-    add     di, 320 - 8     ; 320: width of screen, 8: width of tile
-    ;add     di, 8
-
+    ;add     di, 320 - 8     ; 320: width of screen, 8: width of tile
+    add     di, 320         ; next line
 
     dec	    byte ch
 	jnz	    loop_2		; jump if non zero
 
 
-
-
-    ; mov 	di, 320 ; second line
-    ; mov	    al, 39
-    ; stosb           	; Write AL into address pointed by DI
-
-
 	ret
-    ; jmp exit
         
 ; ---------------------- 
         
