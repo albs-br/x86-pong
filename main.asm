@@ -26,7 +26,7 @@ start:
 
     cld                  ; Clear Direction flag
 
-	;jmp     show_palette
+	; jmp     show_palette
 
 ; ---------------------- draw background
     
