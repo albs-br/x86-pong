@@ -23,10 +23,10 @@ TIMER               equ 046Ch   ; # of timer ticks since midnight
 ; this means 0xfa00 is the first byte of
 ; memory not visible on the screen.
 ;
-ball_X:    equ 0xfa00
-v_a:    equ 0xfa02
-v_b:    equ 0xfa04
-oldtim: equ 0xfa06 ; Old time
+; ball_X:    equ 0xfa00
+; v_a:    equ 0xfa02
+; v_b:    equ 0xfa04
+; oldTime: equ 0xfa06
 
 start:
     mov 	ax, 0x0013   ; Set mode 320x200x256
@@ -45,13 +45,13 @@ start:
     ; first line
     mov	    bx, Tile_Bricks
     mov     cx, 40              ; number of tiles
-    mov 	di, (320 * (0 * 8)) ; initial vram address
+    mov 	di, (SCREEN_WIDTH * (0 * 8)) ; initial vram address
     call    FillLineWith_8x8_Tiles
 
     mov     cx, 23              ; number of lines
 
 
-    mov 	di, (320 * (1 * 8)) ; initial vram address
+    mov 	di, (SCREEN_WIDTH * (1 * 8)) ; initial vram address
 .loop_bg:
     push    cx
         push    di
@@ -61,7 +61,7 @@ start:
         pop     di
     pop     cx
 
-    add     di, 320 * 8
+    add     di, SCREEN_WIDTH * 8
 
     dec     cx
     jnz     .loop_bg
@@ -70,33 +70,32 @@ start:
     ; last line
     mov	    bx, Tile_Bricks
     mov     cx, 40              ; number of tiles
-    mov 	di, (320 * (24 * 8)) ; initial vram address
+    mov 	di, (SCREEN_WIDTH * (24 * 8)) ; initial vram address
     call    FillLineWith_8x8_Tiles
+
+; ---------------------- copy background to bgBuffer
+
+    MOV     SI, 0
+    MOV     DI, bgBuffer
+    MOV     CX, SCREEN_WIDTH * SCREEN_HEIGHT
+    REP     MOVSB  ; copy ECX bytes from DS:ESI to ES:EDI
 
 ; ---------------------- test put tile
 
     mov	    bx, Image_1
-    mov 	di, (320 * 130) + 180       ; initial vram address
+    mov 	di, (SCREEN_WIDTH * 130) + 180       ; initial vram address
     call    Put_8x8_TileOnScreen
 
 ; ---------------------- sprites test
 
     mov	    bx, Sprite_Ball
     ;mov	    bx, Image_1
-    mov 	di, (320 * 30) + 30       ; initial vram address
+    mov 	di, (SCREEN_WIDTH * 30) + 30       ; initial vram address
     call    Put_8x8_SpriteOnScreen
     ;call    Put_8x8_TileOnScreen
 
 ; ---------------------- game loop
 .gameLoop:
-;     ;; Delay timer - 1 tick delay (1 tick = 18.2/second)
-;     ;delay_timer:
-;     mov     ax, [CS:TIMER] 
-;     inc     ax
-; .wait:
-;     cmp     [CS:TIMER], ax
-;     jl      .wait
-
 
     call    wait_frame_18hz                ; Wait a frame (18 hz)
     ;call    wait_frame_100hz                ; Wait a frame (100 hz)
@@ -105,7 +104,7 @@ start:
 
     mov	    bx, Sprite_Ball
     ;mov	    bx, Image_1
-    mov 	di, (320 * 30) + 30       ; initial vram address
+    mov 	di, (SCREEN_WIDTH * 30) + 30       ; initial vram address
     
     mov     ax, [ball_X]
     inc     ax
@@ -135,9 +134,9 @@ wait_frame_18hz:
 .1:
     mov     ah, 0x00 ; Get ticks
     int     0x1a ; Call BIOS time service
-    cmp     dx, [bp + oldtim] ; Same as old time?
+    cmp     dx, [bp + oldTime] ; Same as old time?
     je      .1 ; Yes, wait.
-    mov     [bp + oldtim], dx
+    mov     [bp + oldTime], dx
     ret
     
 ;
@@ -148,9 +147,9 @@ wait_frame_100hz:
     mov     ah, 0x2c            ; Get time
     int     0x21                ; Call DOS get time (Return: CH = hour CL = minute DH = second DL = 1/100 seconds)
     ; Note: on most systems, the resolution of the system clock is about 5/100sec, so returned times generally do not increment by 1 on some systems, DL may always return 00h
-    cmp     dx, [bp + oldtim] ; Same as old time?
+    cmp     dx, [bp + oldTime] ; Same as old time?
     je      .1 ; Yes, wait.
-    mov     [bp + oldtim], dx
+    mov     [bp + oldTime], dx
     ret
     
 
@@ -207,3 +206,16 @@ section .data
 
 %include "tiles.asm"
 %include "sprites.asm"
+
+
+; ------------------------ variables
+section .bss
+
+
+ball_X:     resw 1
+v_a:        resw 1
+v_b:        resw 1
+oldTime:    resw 1
+;bgBuffer:   resb SCREEN_WIDTH * SCREEN_HEIGHT
+
+bgBuffer:   equ 0xfa00
