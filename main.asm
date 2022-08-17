@@ -1,5 +1,6 @@
 ;
-; Tests with VGA mode
+; Pong in x86 assembly with VGA mode
+;
 ; adapted from palette.asm by Oscar Toledo G. (Boot Sector Games book)
 ;
 
@@ -8,13 +9,24 @@
 section .text
 	org 0x0100
 
+
+;---------------------- CONSTANTS
+SCREEN_WIDTH        equ 320     ; Width in pixels
+SCREEN_HEIGHT       equ 200     ; Height in pixels
+VIDEO_MEMORY        equ 0A000h
+TIMER               equ 046Ch   ; # of timer ticks since midnight
+
+
+
 ;
 ; Memory screen uses 64000 pixels,
 ; this means 0xfa00 is the first byte of
 ; memory not visible on the screen.
 ;
-v_a:    equ 0xfa00
-v_b:    equ 0xfa02
+ball_X:    equ 0xfa00
+v_a:    equ 0xfa02
+v_b:    equ 0xfa04
+oldtim: equ 0xfa06 ; Old time
 
 start:
     mov 	ax, 0x0013   ; Set mode 320x200x256
@@ -75,9 +87,72 @@ start:
     call    Put_8x8_SpriteOnScreen
     ;call    Put_8x8_TileOnScreen
 
+; ---------------------- game loop
+.gameLoop:
+;     ;; Delay timer - 1 tick delay (1 tick = 18.2/second)
+;     ;delay_timer:
+;     mov     ax, [CS:TIMER] 
+;     inc     ax
+; .wait:
+;     cmp     [CS:TIMER], ax
+;     jl      .wait
+
+
+    call    wait_frame_18hz                ; Wait a frame (18 hz)
+    ;call    wait_frame_100hz                ; Wait a frame (100 hz)
+
+
+
+    mov	    bx, Sprite_Ball
+    ;mov	    bx, Image_1
+    mov 	di, (320 * 30) + 30       ; initial vram address
+    
+    mov     ax, [ball_X]
+    inc     ax
+    mov     [ball_X], ax
+
+    add     ax, di
+
+    mov     di, ax
+
+    call    Put_8x8_SpriteOnScreen
+
+
+
+    jmp     .gameLoop
+
+
 ; ---------------------- 
 
     jmp     exit
+
+
+
+;
+; Wait a frame (18.2 hz)
+;
+wait_frame_18hz:
+.1:
+    mov     ah, 0x00 ; Get ticks
+    int     0x1a ; Call BIOS time service
+    cmp     dx, [bp + oldtim] ; Same as old time?
+    je      .1 ; Yes, wait.
+    mov     [bp + oldtim], dx
+    ret
+    
+;
+; Wait a frame (100 hz)
+;
+wait_frame_100hz:
+.1:
+    mov     ah, 0x2c            ; Get time
+    int     0x21                ; Call DOS get time (Return: CH = hour CL = minute DH = second DL = 1/100 seconds)
+    ; Note: on most systems, the resolution of the system clock is about 5/100sec, so returned times generally do not increment by 1 on some systems, DL may always return 00h
+    cmp     dx, [bp + oldtim] ; Same as old time?
+    je      .1 ; Yes, wait.
+    mov     [bp + oldtim], dx
+    ret
+    
 
 
 show_palette:
