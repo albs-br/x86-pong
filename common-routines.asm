@@ -2,12 +2,17 @@
 ;   BX: source address
 ;   ES:DI: destiny address (VRAM)
 Put_8x8_TileOnScreen:
+
+    ; mov 	ax, VIDEO_MEMORY    ; 0xa000 video segment
+    ; mov 	es, ax              ; Setup extended segment
+    ; ;mov 	ds, ax              ; Setup data segment
+
     mov	    ch, 8 ; image_1.size		; line counter
 .loop_2:
     mov	    cl, 8 ; image_1.size		; column counter
     push    di
 .loop_1:        
-        mov	    al, [bx]
+        mov	    al, [ds:bx]
         stosb           	; Write AL into address pointed by ES:DI, increments DI
             
         inc	    bx
@@ -55,6 +60,11 @@ FillLineWith_8x8_Tiles:
 ;   BX: source address
 ;   ES:DI: destiny address (VRAM)
 Put_8x8_SpriteOnScreen:
+
+    ; mov 	ax, VIDEO_MEMORY    ; 0xa000 video segment
+    ; mov 	es, ax              ; Setup extended segment
+    ; mov 	ds, ax              ; Setup data segment
+
     mov	    ch, 8 ; image_1.size		; line counter
 .loop_2:
     mov	    cl, 8 ; image_1.size		; column counter

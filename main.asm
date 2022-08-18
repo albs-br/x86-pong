@@ -13,7 +13,7 @@ section .text
 ;---------------------- CONSTANTS
 SCREEN_WIDTH        equ 320     ; Width in pixels
 SCREEN_HEIGHT       equ 200     ; Height in pixels
-VIDEO_MEMORY        equ 0A000h
+VIDEO_MEMORY        equ 0xA000
 TIMER               equ 046Ch   ; # of timer ticks since midnight
 
 
@@ -32,9 +32,15 @@ start:
     mov 	ax, 0x0013   ; Set mode 320x200x256
     int 	0x10        ; Video interruption vector
 
-    mov 	ax, 0xa000   ; 0xa000 video segment
-    mov 	es, ax       ; Setup extended segment
-    ;mov 	ds, ax       ; Setup data segment
+    ; mov 	ax, 0xa000   ; 0xa000 video segment
+    ; mov 	es, ax       ; Setup extended segment
+    ; ; mov 	ds, ax       ; Setup data segment
+
+    mov 	ax, VIDEO_MEMORY    ; 0xa000 video segment
+    mov 	es, ax              ; Setup extended segment
+    ;mov 	ds, ax              ; Setup data segment
+
+
 
     cld                  ; Clear Direction flag
 
@@ -73,12 +79,15 @@ start:
     mov 	di, (SCREEN_WIDTH * (24 * 8)) ; initial vram address
     call    FillLineWith_8x8_Tiles
 
+; .endlessLoop:
+;     jmp .endlessLoop
+
 ; ---------------------- copy background to bgBuffer
 
-    MOV     SI, 0
-    MOV     DI, bgBuffer
-    MOV     CX, SCREEN_WIDTH * SCREEN_HEIGHT
-    REP     MOVSB  ; copy ECX bytes from DS:ESI to ES:EDI
+    ; MOV     SI, 0xa000
+    ; MOV     DI, bgBuffer
+    ; MOV     CX, SCREEN_WIDTH * SCREEN_HEIGHT
+    ; REP     MOVSB  ; copy ECX bytes from DS:ESI to ES:EDI
 
 ; ---------------------- test put tile
 
