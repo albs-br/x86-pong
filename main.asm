@@ -11,22 +11,24 @@ section .text
 
 
 ;---------------------- CONSTANTS
-SCREEN_WIDTH        equ 320     ; Width in pixels
-SCREEN_HEIGHT       equ 200     ; Height in pixels
-VIDEO_MEMORY        equ 0xA000
-TIMER               equ 046Ch   ; # of timer ticks since midnight
+SCREEN_WIDTH                equ 320     ; Width in pixels
+SCREEN_HEIGHT               equ 200     ; Height in pixels
+VIDEO_MEMORY_SEGMENT        equ 0xA000
+BUFFER_SEGMENT              equ 0xB000
+TIMER                       equ 046Ch   ; # of timer ticks since midnight
 
 
 
-;
-; Memory screen uses 64000 pixels,
-; this means 0xfa00 is the first byte of
-; memory not visible on the screen.
-;
+; ;
+; ; Memory screen uses 64000 pixels,
+; ; this means 0xfa00 is the first byte of
+; ; memory not visible on the screen.
+; ;
 ; ball_X:    equ 0xfa00
 ; v_a:    equ 0xfa02
 ; v_b:    equ 0xfa04
 ; oldTime: equ 0xfa06
+
 
 start:
     mov 	ax, 0x0013   ; Set mode 320x200x256
@@ -36,9 +38,13 @@ start:
     ; mov 	es, ax       ; Setup extended segment
     ; ; mov 	ds, ax       ; Setup data segment
 
-    mov 	ax, VIDEO_MEMORY    ; 0xa000 video segment
+    mov 	ax, VIDEO_MEMORY_SEGMENT    ; 0xa000 video segment
     mov 	es, ax              ; Setup extended segment
-    ;mov 	ds, ax              ; Setup data segment
+    ; mov 	ax, DATA_SEGMENT    ; 0xb000 data segment
+    ; mov     ax, 0
+    ; mov 	ds, ax              ; Setup extended segment
+    mov     ax, cs
+    mov 	ds, ax              ; Setup extended segment
 
 
 
@@ -46,8 +52,16 @@ start:
 
 	; jmp     show_palette
 
+
+;     mov	    bx, Image_1
+;     mov 	di, (SCREEN_WIDTH * 130) + 180       ; initial vram address
+;     call    Put_8x8_TileOnScreen
+
+; .endlessLoop:
+;     jmp .endlessLoop
+
 ; ---------------------- draw background
-    
+
     ; first line
     mov	    bx, Tile_Bricks
     mov     cx, 40              ; number of tiles
@@ -110,6 +124,22 @@ start:
     ;call    wait_frame_100hz                ; Wait a frame (100 hz)
 
 
+    ; read keys
+    mov ah, 1h   ; CHECK FOR KEYSTROKE
+    int 16h
+    jz .loop1     ; Jump if none pressed.
+    mov ah, 0h   ; GET KEYSTROKE
+    int 16h
+    cmp al, 6bh  ; Check if it is 'k'.
+    ;jne loop1    ; If not, continue. Keybuffer is now empty.
+
+    ; 'k' pressed
+    mov     ax, [ball_X]
+    add     ax, SCREEN_WIDTH * 3
+    mov     [ball_X], ax
+    
+
+.loop1:
 
     mov	    bx, Sprite_Ball
     ;mov	    bx, Image_1
@@ -227,4 +257,7 @@ v_b:        resw 1
 oldTime:    resw 1
 ;bgBuffer:   resb SCREEN_WIDTH * SCREEN_HEIGHT
 
-bgBuffer:   equ 0xfa00
+;bgBuffer:   equ 0xfa00
+
+Sprite_Ball_Bg_OldAdrr:     resw 1
+Sprite_Ball_Bg_Data:     resb 8*8

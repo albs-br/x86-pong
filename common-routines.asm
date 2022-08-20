@@ -5,7 +5,8 @@ Put_8x8_TileOnScreen:
 
     ; mov 	ax, VIDEO_MEMORY    ; 0xa000 video segment
     ; mov 	es, ax              ; Setup extended segment
-    ; ;mov 	ds, ax              ; Setup data segment
+    ; mov 	ax, DATA_SEGMENT    ; 0xb000 data segment
+    ; mov 	ds, ax              ; Setup extended segment
 
     mov	    ch, 8 ; image_1.size		; line counter
 .loop_2:
@@ -57,13 +58,60 @@ FillLineWith_8x8_Tiles:
 
 
 ; Inputs:
+;   DX: bg buffer address
+;   BX: sprite pattern source address
+;   ES:DI: destiny address (VRAM)
+Put_8x8_SpriteOnScreen_RestoringBg:
+
+    push    bx
+        push    es
+            push    di
+                ; --------- copy from BG Buffer to screen
+                ;mov     ds, cs
+                push    cs
+                pop     ds
+                mov     si, [Sprite_Ball_Bg_Data]
+                ;mov     es, VIDEO_MEMORY_SEGMENT
+                mov     ax, VIDEO_MEMORY_SEGMENT
+                mov     es, ax
+                mov     di, [Sprite_Ball_Bg_OldAdrr]
+                mov     cx, 8 ;SCREEN_WIDTH * SCREEN_HEIGHT
+                rep     movsb  ; copy CX bytes from DS:SI to ES:DI
+
+            pop     di
+
+            ; save new VRAM address
+            mov     [Sprite_Ball_Bg_OldAdrr], di
+
+            push    di
+                ; --------- copy from screen to BG Buffer
+
+                push    cs
+                pop     es
+                mov     di, [Sprite_Ball_Bg_Data]
+                mov     cx, 8
+                rep     movsb  ; copy CX bytes from DS:SI to ES:DI
+            pop     di
+
+
+        pop     es
+    pop     bx
+
+    call    Put_8x8_SpriteOnScreen
+
+    ret
+
+
+
+; Inputs:
 ;   BX: source address
 ;   ES:DI: destiny address (VRAM)
 Put_8x8_SpriteOnScreen:
 
     ; mov 	ax, VIDEO_MEMORY    ; 0xa000 video segment
     ; mov 	es, ax              ; Setup extended segment
-    ; mov 	ds, ax              ; Setup data segment
+    ; mov 	ax, DATA_SEGMENT    ; 0xb000 data segment
+    ; mov 	ds, ax              ; Setup extended segment
 
     mov	    ch, 8 ; image_1.size		; line counter
 .loop_2:
